@@ -8,17 +8,17 @@ eeepc_info()
 			BOARD_USES_TSLIB=true
 			;;
 		ET2002*)
-			FB0DEV=
 			UVESA_MODE=${UVESA_MODE:-1600x900}
 			BOARD_USES_TSLIB=true
 			;;
-		T91)
-			FB0DEV=
+		T91|T101)
 			UVESA_MODE=${UVESA_MODE:-1024x600}
 			BOARD_USES_TSLIB=true
 			;;
-		T101)
+		T91MT|T101MT)
+			UVESA_MODE=${UVESA_MODE:-1024x600}
 			BOARD_USES_TSLIB=true
+			EXTMOD="$EXTMOD hid-egalax"
 			;;
 		*)
 			;;

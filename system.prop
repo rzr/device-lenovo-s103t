@@ -1,2 +1,4 @@
 # system.prop for eeepc
+ro.config.nocheckin=yes
+ro.com.google.clientidbase=android-google
 # end system.prop for eeepc
