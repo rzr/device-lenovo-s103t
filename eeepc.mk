@@ -4,3 +4,4 @@ $(call inherit-product,$(SRC_TARGET_DIR)/product/generic_x86.mk)
 
 PRODUCT_NAME := eeepc
 PRODUCT_DEVICE := eeepc
+PRODUCT_MANUFACTURER := asus
