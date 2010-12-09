@@ -5,8 +5,6 @@ eeepc_info()
 	board=`cat $DMIPATH/product_name`
 	case "$board" in
 		ET1602*)
-			# i915 is buggy ?
-			# modprobe i915 modeset=0
 			BOARD_USES_TSLIB=true
 			;;
 		ET2002*)
@@ -25,6 +23,11 @@ eeepc_info()
 		*)
 			;;
 	esac
+
+	# enable wifi and bluetooth
+	modprobe eeepc-laptop
+	echo 1 > /sys/class/rfkill/rfkill0/state
+	echo 1 > /sys/class/rfkill/rfkill1/state
 
 	return 1 # auto_detect
 }
