@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35.7
-# Mon Oct 25 18:24:37 2010
+# Thu Dec  9 17:22:41 2010
 #
 # CONFIG_64BIT is not set
 CONFIG_X86_32=y
@@ -969,7 +969,7 @@ CONFIG_R8169=m
 # CONFIG_QLA3XXX is not set
 # CONFIG_ATL1 is not set
 CONFIG_ATL1E=m
-# CONFIG_ATL1C is not set
+CONFIG_ATL1C=m
 # CONFIG_JME is not set
 # CONFIG_NETDEV_10000 is not set
 # CONFIG_TR is not set
@@ -1830,6 +1830,7 @@ CONFIG_USB_HID=y
 # CONFIG_HID_WACOM is not set
 # CONFIG_HID_ZEROPLUS is not set
 # CONFIG_HID_ZYDACRON is not set
+# CONFIG_HID_HANVON is not set
 CONFIG_USB_SUPPORT=y
 CONFIG_USB_ARCH_HAS_HCD=y
 CONFIG_USB_ARCH_HAS_OHCI=y
@@ -2282,7 +2283,7 @@ CONFIG_MISC_FILESYSTEMS=y
 # CONFIG_LOGFS is not set
 # CONFIG_CRAMFS is not set
 CONFIG_SQUASHFS=y
-# CONFIG_SQUASHFS_XATTRS is not set
+CONFIG_SQUASHFS_XATTRS=y
 # CONFIG_SQUASHFS_EMBEDDED is not set
 CONFIG_SQUASHFS_FRAGMENT_CACHE_SIZE=3
 # CONFIG_VXFS_FS is not set
