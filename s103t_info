@@ -1,0 +1,24 @@
+set -x
+
+s103t_info()
+{
+	PREDEV=snd-hda-codec-conexant
+	SNDDEV=snd-hda-intel model=ideapad
+        CAMDEV=uvcvideo
+	FB0DEV=i915
+	modprobe v4l1_compat
+	#enable cando touch screen driver
+	modprobe hid_multitouch
+	#enable 80211 WiFi
+	modprobe lib80211
+	modprobe wl
+	modprobe wmi
+	modprobe lsrot.ko
+	echo WAKE_LOCK_SUSPEND > /sys/power/wake_lock
+        return 1
+}
+
+detect_hardware()
+{
+	s103t_info
+}
