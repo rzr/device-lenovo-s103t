@@ -1,0 +1,50 @@
+DMIPATH=/sys/class/dmi/id
+
+eeepc_info()
+{
+	board=`cat $DMIPATH/product_name`
+	case "$board" in
+		ET1602*)
+			BOARD_USES_TSLIB=true
+			;;
+		ET2002*)
+			UVESA_MODE=${UVESA_MODE:-1600x900}
+			BOARD_USES_TSLIB=true
+			;;
+		T91|T101)
+			UVESA_MODE=${UVESA_MODE:-1024x600}
+			BOARD_USES_TSLIB=true
+			;;
+		T91MT|T101MT)
+			UVESA_MODE=${UVESA_MODE:-1024x600}
+			BOARD_USES_TSLIB=true
+			EXTMOD="$EXTMOD hid-multitouch"
+			;;
+		*)
+			;;
+	esac
+
+	# enable wifi and bluetooth
+	modprobe eeepc-laptop
+	echo 1 > /sys/class/rfkill/rfkill0/state
+	echo 1 > /sys/class/rfkill/rfkill1/state
+
+	return 1 # auto_detect
+}
+
+detect_hardware()
+{
+	case "`cat $DMIPATH/uevent`" in
+		*ASUSTeK*)
+			grep -q EeePC $DMIPATH/board_serial || grep -q ^ET $DMIPATH/board_name
+			if [ $? -eq 0 ]; then
+				eeepc_info
+			else
+				error WARNING: Not an ASUS Eee PC
+			fi
+			;;
+		*)
+			error WARNING: Not an ASUS product
+			;;
+	esac
+}

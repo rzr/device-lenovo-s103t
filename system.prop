@@ -1,0 +1,3 @@
+# system.prop for eeepc
+ro.sf.lcd_density=160
+# end system.prop for eeepc
