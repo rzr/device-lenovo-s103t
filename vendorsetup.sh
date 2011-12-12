@@ -1,1 +1,1 @@
-add_lunch_combo eeepc-eng
+add_lunch_combo s103t-eng

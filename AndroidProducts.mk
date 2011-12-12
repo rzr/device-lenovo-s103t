@@ -26,4 +26,4 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/eeepc.mk
+    $(LOCAL_DIR)/s103t.mk
