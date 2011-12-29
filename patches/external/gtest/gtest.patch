@@ -1,0 +1,12 @@
+diff --git a/include/gtest/internal/gtest-param-util.h b/include/gtest/internal/gtest-param-util.h
+index 5559ab4..0db5fef 100644
+--- a/include/gtest/internal/gtest-param-util.h
++++ b/include/gtest/internal/gtest-param-util.h
+@@ -34,6 +34,7 @@
+ #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
+ #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
+ 
++#include <malloc.h>
+ #include <iterator>
+ #include <utility>
+ #include <vector>

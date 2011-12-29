@@ -1,0 +1,27 @@
+diff --git a/Android.mk b/Android.mk
+index 810c060..051b6ee 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -220,6 +220,9 @@ LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
+ 
+ #LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+ 
++LOCAL_CFLAGS := -fpermissive
++LOCAL_CXXFLAGS := -fpermissive
++
+ LOCAL_DX_FLAGS := --core-library
+ 
+ include $(BUILD_JAVA_LIBRARY)
+diff --git a/libs/utils/RefBase.cpp b/libs/utils/RefBase.cpp
+index bb6c125..c40a0ec 100644
+--- a/libs/utils/RefBase.cpp
++++ b/libs/utils/RefBase.cpp
+@@ -524,7 +524,7 @@ void RefBase::weakref_type::printRefs() const
+ 
+ void RefBase::weakref_type::trackMe(bool enable, bool retain)
+ {
+-    static_cast<const weakref_impl*>(this)->trackMe(enable, retain);
++  static_cast</*const*/ weakref_impl*>(this)->trackMe(enable, retain); //TODO
+ }
+ 
+ RefBase::weakref_type* RefBase::createWeak(const void* id) const

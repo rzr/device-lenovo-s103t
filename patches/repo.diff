@@ -1,0 +1,223 @@
+
+project bootable/newinstaller/
+diff --git a/Android.mk b/Android.mk
+index edb9eee..23a23bd 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -116,7 +116,11 @@ USB_LAYOUT := $(LOCAL_PATH)/usb_layout.conf
+ USB_IMAGE := $(PRODUCT_OUT)/$(TARGET_PRODUCT)_usb.img
+ $(USB_IMAGE): $(usb_tmp_img) $(USB_LAYOUT) $(PRODUCT_OUT)/grub/grub.bin | $(edit_mbr)
+ 	@echo ----- Making usb image ------
+-	@sed 's|default 2|default 0|' $(PRODUCT_OUT)/grub/grub.bin > $@
++
++#	http://groups.google.com/group/android-x86/browse_thread/thread/afae951f1775d39/baa5480e08025950?lnk=gst&q=ICS+USB+first+grub+menu+patch#baa5480e08025950
++#	@sed 's|default 1|default 0|' $(PRODUCT_OUT)/grub/grub.bin > $@ #orig
++	@sed 's|default=1|default=0|' $(PRODUCT_OUT)/grub/grub.bin | sed 's|hd1,0|hd0,0|' | sed 's|hd0,2|hd0,0|' > $@
++
+ 	@$(edit_mbr) -l $(USB_LAYOUT) -i $@ usb_boot=$(usb_tmp_img)
+ 
+ .PHONY: iso_img usb_img
+
+project external/gtest/
+diff --git a/include/gtest/internal/gtest-param-util.h b/include/gtest/internal/gtest-param-util.h
+index 5559ab4..0db5fef 100644
+--- a/include/gtest/internal/gtest-param-util.h
++++ b/include/gtest/internal/gtest-param-util.h
+@@ -34,6 +34,7 @@
+ #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
+ #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
+ 
++#include <malloc.h>
+ #include <iterator>
+ #include <utility>
+ #include <vector>
+
+project frameworks/base/
+diff --git a/Android.mk b/Android.mk
+index 810c060..051b6ee 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -220,6 +220,9 @@ LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
+ 
+ #LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+ 
++LOCAL_CFLAGS := -fpermissive
++LOCAL_CXXFLAGS := -fpermissive
++
+ LOCAL_DX_FLAGS := --core-library
+ 
+ include $(BUILD_JAVA_LIBRARY)
+diff --git a/libs/utils/RefBase.cpp b/libs/utils/RefBase.cpp
+index bb6c125..c40a0ec 100644
+--- a/libs/utils/RefBase.cpp
++++ b/libs/utils/RefBase.cpp
+@@ -524,7 +524,7 @@ void RefBase::weakref_type::printRefs() const
+ 
+ void RefBase::weakref_type::trackMe(bool enable, bool retain)
+ {
+-    static_cast<const weakref_impl*>(this)->trackMe(enable, retain);
++  static_cast</*const*/ weakref_impl*>(this)->trackMe(enable, retain); //TODO
+ }
+ 
+ RefBase::weakref_type* RefBase::createWeak(const void* id) const
+
+project frameworks/compile/pixelflinger2/
+diff --git a/src/main/compiler.h b/src/main/compiler.h
+index 07933db..da66a5e 100644
+--- a/src/main/compiler.h
++++ b/src/main/compiler.h
+@@ -46,7 +46,7 @@
+ #include <stdio.h>
+ #include <string.h>
+ #if defined(__linux__) && defined(__i386__)
+-#include <fpu_control.h>
++//#include <fpu_control.h>
+ #endif
+ #include <float.h>
+ #include <stdarg.h>
+
+project kernel/
+diff --git a/drivers/net/wireless/wl/Makefile b/drivers/net/wireless/wl/Makefile
+index a820e0c..598ffbe 100644
+--- a/drivers/net/wireless/wl/Makefile
++++ b/drivers/net/wireless/wl/Makefile
+@@ -1,9 +1,132 @@
+-obj-m		+= wl.o
+ 
+-wl-objs		:= src/shared/linux_osl.o
+-wl-objs		+= src/wl/sys/wl_linux.o
+-wl-objs		+= src/wl/sys/wl_iw.o
++#
++# Makefile fragment for Linux 2.6
++# Broadcom 802.11abg Networking Device Driver
++#
++# Copyright (C) 2010, Broadcom Corporation
++# All Rights Reserved.
++# 
++# This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
++# the contents of this file may not be disclosed to third parties, copied
++# or duplicated in any form, in whole or in part, without the prior
++# written permission of Broadcom Corporation.
++#
++# $Id: Makefile_kbuild_portsrc,v 1.6.54.4 2011-01-27 00:55:34 Exp $
+ 
+-EXTRA_CFLAGS	+= -I$(src)/src/include
+-EXTRA_CFLAGS	+= -I$(src)/src/wl/sys
+-EXTRA_LDFLAGS	:= $(srctree)/$(src)/lib/wlc_hybrid.o_shipped
++ifneq ($(KERNELRELEASE),)
++
++  LINUXVER_GOODFOR_CFG80211:=$(strip $(shell \
++    if [ "$(VERSION)" -ge "2" -a "$(PATCHLEVEL)" -ge "6" -a "$(SUBLEVEL)" -ge "32" ]; then \
++      echo TRUE; \
++    else \
++      echo FALSE; \
++    fi \
++  ))
++
++    LINUXVER_WEXT_ONLY:=$(strip $(shell \
++    if [ "$(VERSION)" -ge "2" -a "$(PATCHLEVEL)" -ge "6" -a "$(SUBLEVEL)" -ge "17" ]; then \
++      echo FALSE; \
++    else \
++      echo TRUE; \
++    fi \
++  ))
++
++  ifneq ($(API),)
++    ifeq ($(API), CFG80211)
++      APICHOICE := FORCE_CFG80211
++      $(info CFG80211 API specified in command line)
++    else
++      ifeq ($(API), WEXT)
++        APICHOICE := FORCE_WEXT
++        $(info Wireless Extension API specified in command line)
++      else
++        $(error Unknown API type)
++      endif
++    endif
++  else
++    ifeq ($(LINUXVER_GOODFOR_CFG80211),TRUE)
++      APICHOICE := PREFER_CFG80211
++      $(info CFG80211 API is prefered for this kernel version)
++    else
++      ifeq ($(LINUXVER_WEXT_ONLY),TRUE)
++        APICHOICE := FORCE_WEXT
++        $(info Wireless Extension is the only possible API for this kernel version)
++      else
++        APICHOICE := PREFER_WEXT
++        $(info Wireless Extension API is prefered for this kernel version)
++      endif
++    endif
++  endif
++
++  ifeq ($(APICHOICE),FORCE_CFG80211)
++    ifneq ($(CONFIG_CFG80211),)
++      APIFINAL := CFG80211
++    else
++      $(error CFG80211 is specified but it is not enabled in kernel)
++    endif
++  endif
++
++  ifeq ($(APICHOICE),FORCE_WEXT)
++    APIFINAL := WEXT
++  endif
++
++  ifeq ($(APICHOICE),PREFER_CFG80211)
++    ifneq ($(CONFIG_CFG80211),)
++      APIFINAL := CFG80211
++    else
++      ifneq ($(CONFIG_WIRELESS_EXT),)
++        APIFINAL := WEXT
++      else
++        $(warning Neither CFG80211 nor Wireless Extension is enabled in kernel)
++      endif
++    endif
++  endif
++
++  ifeq ($(APICHOICE),PREFER_WEXT)
++    ifneq ($(CONFIG_WIRELESS_EXT),)
++      APIFINAL := WEXT
++    else
++      ifneq ($(CONFIG_CFG80211),)
++        APIFINAL := CFG80211
++      else
++        $(warning Neither CFG80211 nor Wireless Extension is enabled in kernel)
++      endif
++    endif
++  endif
++
++endif
++
++EXTRA_CFLAGS :=
++
++ifeq ($(APIFINAL),CFG80211)
++  EXTRA_CFLAGS += -DUSE_CFG80211
++  $(info Using CFG80211 API)
++endif
++
++ifeq ($(APIFINAL),WEXT)
++  EXTRA_CFLAGS += -DUSE_IW
++  $(info Using Wireless Extension API)
++endif
++
++obj-m              += wl.o
++
++wl-objs            := 
++wl-objs            += src/shared/linux_osl.o
++wl-objs            += src/wl/sys/wl_linux.o
++wl-objs            += src/wl/sys/wl_iw.o
++wl-objs            += src/wl/sys/wl_cfg80211.o
++
++EXTRA_CFLAGS       += -I$(src)/src/include
++EXTRA_CFLAGS       += -I$(src)/src/wl/sys -I$(src)/src/wl/phy
++#EXTRA_CFLAGS       += -DBCMDBG_ASSERT
++
++EXTRA_LDFLAGS      := $(srctree)/$(src)/lib/wlc_hybrid.o_shipped
++
++all:
++	KBUILD_NOPEDANTIC=1 make -C /lib/modules/`uname -r`/build M=`pwd`
++
++clean:
++	KBUILD_NOPEDANTIC=1 make -C /lib/modules/`uname -r`/build M=`pwd` clean
++
++install:
++	install -D -m 755 wl.ko /lib/modules/`uname -r`/kernel/drivers/net/wireless/wl.ko
