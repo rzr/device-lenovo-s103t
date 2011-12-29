@@ -1,0 +1,19 @@
+diff --git a/src/glsl/linker.cpp b/src/glsl/linker.cpp
+index f8b6962..546e0ef 100644
+--- a/src/glsl/linker.cpp
++++ b/src/glsl/linker.cpp
+@@ -63,6 +63,7 @@
+  *
+  * \author Ian Romanick <ian.d.romanick@intel.com>
+  */
++#include <stddef.h> //http://code.google.com/p/android/issues/detail?id=23206
+ #include <cstdlib>
+ #include <cstdio>
+ #include <cstdarg>
+@@ -1762,4 +1763,4 @@ done:
+    }
+ 
+    //hieralloc_free(mem_ctx);
+-}
+\ No newline at end of file
++}
